@@ -38,10 +38,7 @@ public:
   ~JniContext();
 
   JNIEnv *getJNIEnv() const;
-  void setCurrentJNIEnv(JNIEnv *env) {
-    assert(m_jniEnvSetup == EnvironmentSource::Manual);
-    m_currentJniEnv = env;
-  }
+  void setCurrentJNIEnv(JNIEnv *env);
 
   jmethodID getMethodID(const JniRef<jclass> &, const char *name, const char *sig) const;
   jmethodID getStaticMethodID(const JniRef<jclass> &, const char *name, const char *sig) const;
@@ -218,8 +215,6 @@ public:
   }
 
 private:
-  void setUpJniEnv() const;
-
   JNIEnv *m_currentJniEnv;
   JavaVM *m_jvm;
   EnvironmentSource m_jniEnvSetup;

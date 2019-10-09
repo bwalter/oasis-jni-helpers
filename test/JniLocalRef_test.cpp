@@ -254,7 +254,7 @@ TEST_F(JniLocalRefTest, MoveAssignmentOperator) {
   // Remaining one (localRef3) will be auto-deleted
 }
 
-TEST_F(JniLocalRefTest, NoAutoRelease) {
+TEST_F(JniLocalRefTest, Borrowed) {
 
   EXPECT_CALL(*env, NewLocalRef(_))
     .Times(0);
@@ -262,7 +262,7 @@ TEST_F(JniLocalRefTest, NoAutoRelease) {
     .Times(0);
 
   // Original local ref
-  JniLocalRef<jobject> localRef1(jniContext, jobject(123), JniRefReleaseMode::Never);
+  JniLocalRef<jobject> localRef1(jniContext, jobject(123), JniLocalRefMode::Borrowed);
 
   EXPECT_EQ(jobject(123), localRef1.get());
   EXPECT_EQ(nullptr, localRef1.m_sharedAutoRelease.get());
@@ -295,6 +295,27 @@ TEST_F(JniLocalRefTest, NoAutoRelease) {
   localRef1.release();
   localRef2.release();
   localRef3.release();
+}
+
+TEST_F(JniLocalRefTest, NewLocalRef) {
+
+  EXPECT_CALL(*env, NewLocalRef(jobject(123)))
+    .Times(1)
+    .WillOnce(Return(jobject(124)));
+  EXPECT_CALL(*env, DeleteLocalRef(_))
+    .Times(0);
+
+  // Original local ref
+  JniLocalRef<jobject> localRef1(jniContext, jobject(123), JniLocalRefMode::NewLocalRef);
+
+  EXPECT_CALL(*env, NewLocalRef(_))
+    .Times(0);
+
+  EXPECT_EQ(jobject(124), localRef1.get());
+  EXPECT_NE(nullptr, localRef1.m_sharedAutoRelease.get());
+
+  EXPECT_CALL(*env, DeleteLocalRef(jobject(124)))
+    .Times(1);
 }
 
 TEST_F(JniLocalRefTest, Detach) {

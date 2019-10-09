@@ -251,7 +251,7 @@ TEST_F(JniGlobalRefTest, MoveAssignmentOperator) {
     .Times(1);
 }
 
-TEST_F(JniGlobalRefTest, NoAutoRelease) {
+TEST_F(JniGlobalRefTest, Leaked) {
 
   EXPECT_CALL(*env, NewGlobalRef(jobject(123)))
     .Times(1)
@@ -262,7 +262,7 @@ TEST_F(JniGlobalRefTest, NoAutoRelease) {
 
   // Original local + global ref
   JniLocalRef<jobject> localRef(jniContext, jobject(123));
-  JniGlobalRef<jobject> globalRef1(localRef, JniRefReleaseMode::Never);
+  JniGlobalRef<jobject> globalRef1(localRef, JniGlobalRefMode::Leaked);
 
   // Release the source local ref
   EXPECT_CALL(*env, DeleteLocalRef(jobject(123)))

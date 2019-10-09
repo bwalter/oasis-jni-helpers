@@ -99,3 +99,9 @@ JNIEnv *JniContext::getJNIEnv() const {
   assert(env);
   return env;
 }
+
+void JniContext::setCurrentJNIEnv(JNIEnv *env) {
+  assert(m_jniEnvSetup == EnvironmentSource::Manual);
+  m_currentJniEnv = env;
+}
+
