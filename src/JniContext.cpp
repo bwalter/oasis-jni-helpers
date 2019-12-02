@@ -16,9 +16,19 @@
 #include "JniContext.h"
 #include "JStringLocalRef.h"
 
+namespace {
+  struct JvmDetacher {
+    JavaVM &javaVm;
+
+    JvmDetacher(JavaVM *javaVm): javaVm(*javaVm) {}
+    ~JvmDetacher() { javaVm.DetachCurrentThread(); }
+  };
+}
+
 JniContext::JniContext(JNIEnv *env, EnvironmentSource jniEnvSetup)
  : m_currentJniEnv(jniEnvSetup == EnvironmentSource::JvmAuto ? nullptr : env)
- , m_jniEnvSetup(jniEnvSetup) {
+ , m_jniEnvSetup(jniEnvSetup)
+ , m_jniVersion(env->GetVersion()) {
 
   env->GetJavaVM(&m_jvm);
   assert(m_jvm != nullptr);
@@ -72,10 +82,21 @@ void JniContext::exceptionClear() const {
   env->ExceptionClear();
 }
 
-static JNIEnv *getEnvFromJvm(JavaVM *jvm) {
+static JNIEnv *getEnvFromJvm(JavaVM *jvm, jint jniVersion) {
   JNIEnv *jvmEnv;
 
+  jvm->GetEnv(reinterpret_cast<void **>(&jvmEnv), jniVersion);
+  if (jvmEnv) {
+    return jvmEnv;
+  }
+
   jvm->AttachCurrentThread(&jvmEnv, nullptr);
+
+  if (jvmEnv) {
+    // Ensure that the Java VM is detached when the thread exits
+    thread_local JvmDetacher detacher(jvm);
+  }
+
   return jvmEnv;
 }
 
@@ -85,13 +106,13 @@ JNIEnv *JniContext::getJNIEnv() const {
 
   switch (m_jniEnvSetup) {
     case EnvironmentSource::JvmAuto:
-      env = getEnvFromJvm(m_jvm);
+      env = getEnvFromJvm(m_jvm, m_jniVersion);
       break;
 
     case EnvironmentSource::Manual:
       env = m_currentJniEnv;
 #ifndef NDEBUG
-      assert(env == getEnvFromJvm(m_jvm));
+      assert(env == getEnvFromJvm(m_jvm, m_jniVersion));
 #endif
       break;
   }

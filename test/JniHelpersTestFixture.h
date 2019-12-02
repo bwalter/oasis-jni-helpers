@@ -42,6 +42,12 @@ protected:
       .Times(1)
       .WillOnce(DoAll(SetArgPointee<0>(jvm), Return(jint(0))));
 
+    EXPECT_CALL(*env, GetVersion())
+      .WillRepeatedly(Return(jint(69)));
+
+    EXPECT_CALL(*jvm, GetEnv(_, jint(69)))
+      .WillRepeatedly(DoAll(SetArgPointee<0>(env), Return(jint(0))));
+
     EXPECT_CALL(*jvm, AttachCurrentThread(_, _))
       .WillRepeatedly(DoAll(SetArgPointee<0>(env), Return(jint(0))));
 

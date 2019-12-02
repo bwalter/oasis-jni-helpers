@@ -218,6 +218,7 @@ private:
   JNIEnv *m_currentJniEnv;
   JavaVM *m_jvm;
   EnvironmentSource m_jniEnvSetup;
+  const jint m_jniVersion;
 };
 
 #endif
