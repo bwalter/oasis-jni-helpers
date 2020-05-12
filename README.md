@@ -93,7 +93,7 @@ $ cd test
 $ mkdir build
 $ cmake ..
 $ make
-$ ./runUnitTests
+$ make test
 ```
 
 (Google Test will be automatically downloaded and compiled via cmake)
