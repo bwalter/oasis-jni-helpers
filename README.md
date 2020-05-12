@@ -92,8 +92,8 @@ See https://github.com/prosiebensat-1-digital-gmbh/oasis-jsbridge
 $ cd test
 $ mkdir build
 $ cmake ..
-$ make
-$ make test
+$ cmake --build .
+$ ctest
 ```
 
 (Google Test will be automatically downloaded and compiled via cmake)

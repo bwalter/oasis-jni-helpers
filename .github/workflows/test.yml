@@ -15,7 +15,7 @@ jobs:
     - uses: actions/checkout@v2
     - name: create and enter test build directory
       run: mkdir test/build
-    - name: run cmake
+    - name: configure
       working-directory: test/build
       run: cmake ..
     - name: build
