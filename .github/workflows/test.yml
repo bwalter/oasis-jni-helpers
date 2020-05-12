@@ -14,10 +14,13 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: create and enter test build directory
-      run: mkdir test/build && cd test/build
+      run: mkdir test/build
     - name: run cmake
+      working-directory: test/build
       run: cmake ..
-    - name: make
-      run: make
-    - name: make test
-      run: make test
+    - name: build
+      working-directory: test/build
+      run: cmake --build .
+    - name: test
+      working-directory: test/build
+      run: ctest
